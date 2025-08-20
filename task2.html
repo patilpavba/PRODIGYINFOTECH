@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stopwatch</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+      margin-top: 100px;
+    }
+    #display {g
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;g
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .start { background-color: #4caf50; color: white; }
+    .pause { background-color: #ff9800; color: white; }
+    .reset { background-color: #f44336; color: white; }
+    .lap   { background-color: #2196f3; color: white; }
+    ul {
+      margin-top: 30px;
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: white;
+      padding: 8px;
+      margin: 4px auto;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Stopwatch</h1>
+  <div id="display">00:00:00.0</div>
+  <button onclick="start()" class="start">Start</button>
+  <button onclick="pause()" class="pause">Pause</button>
+  <button onclick="reset()" class="reset">Reset</button>
+  <button onclick="lap()" class="lap">Lap</button>
+
+  <ul id="laps"></ul>
+
+  <script>
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval;
+    let isRunning = false;
+
+    function timeToString(time) {
+      let hrs = Math.floor(time / 3600000);
+      let mins = Math.floor((time % 3600000) / 60000);
+      let secs = Math.floor((time % 60000) / 1000);
+      let millis = Math.floor((time % 1000) / 100);
+      return (
+        (hrs < 10 ? "0" + hrs : hrs) + ":" +
+        (mins < 10 ? "0" + mins : mins) + ":" +
+        (secs < 10 ? "0" + secs : secs) + "." +
+        millis
+      );
+    }
+
+    function start() {
+      if (!isRunning) {
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(() => {
+          elapsedTime = Date.now() - startTime;
+          document.getElementById("display").textContent = timeToString(elapsedTime);
+        }, 100);
+        isRunning = true;
+      }
+    }
+
+    function pause() {
+      if (isRunning) {
+        clearInterval(timerInterval);
+        isRunning = false;
+      }
+    }
+
+    function reset() {
+      clearInterval(timerInterval);
+      elapsedTime = 0;
+      isRunning = false;
+      document.getElementById("display").textContent = "00:00:00.0";
+      document.getElementById("laps").innerHTML = "";
+    }
+
+    function lap() {
+      if (isRunning) {
+        const lapTime = timeToString(elapsedTime);
+        const li = document.createElement("li");
+        li.textContent = lapTime;
+        document.getElementById("laps").appendChild(li);
+      }
+    }
+  </script>
+
+</body>
+</html>

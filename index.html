@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic Tac Toe - Stylish</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      flex-direction: column;
+    }
+
+    h1 {
+      color: #003366;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 3px #fff;
+    }
+
+    .choice-container {
+      margin-bottom: 20px;
+    }
+
+    .choice-container button {
+      padding: 12px 25px;
+      margin: 0 10px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .choice-container button:hover {
+      background-color: #005fa3;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 110px);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .cell {
+      width: 110px;
+      height: 110px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 50px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+
+    .cell:hover {
+      background: #e6f2ff;
+    }
+
+    .cell.winner {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .status {
+      margin-top: 25px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #003366;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe 🎮</h1>
+
+  <div class="choice-container" id="symbolChoice">
+    <span style="font-size:18px;">Choose your symbol:</span>
+    <button onclick="startGame('X')">X</button>
+    <button onclick="startGame('O')">O</button>
+  </div>
+
+  <div class="board hidden" id="gameBoard">
+    <div class="cell" onclick="makeMove(0)"></div>
+    <div class="cell" onclick="makeMove(1)"></div>
+    <div class="cell" onclick="makeMove(2)"></div>
+    <div class="cell" onclick="makeMove(3)"></div>
+    <div class="cell" onclick="makeMove(4)"></div>
+    <div class="cell" onclick="makeMove(5)"></div>
+    <div class="cell" onclick="makeMove(6)"></div>
+    <div class="cell" onclick="makeMove(7)"></div>
+    <div class="cell" onclick="makeMove(8)"></div>
+  </div>
+
+  <div class="status" id="statusText"></div>
+
+  <script>
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let userSymbol = "";
+    let botSymbol = "";
+    let gameOver = false;
+
+    function startGame(symbol) {
+      userSymbol = symbol;
+      botSymbol = symbol === "X" ? "O" : "X";
+      document.getElementById("symbolChoice").classList.add("hidden");
+      document.getElementById("gameBoard").classList.remove("hidden");
+      document.getElementById("statusText").textContent = "Your turn!";
+    }
+
+    function makeMove(index) {
+      if (gameOver || board[index] !== "") return;
+
+      board[index] = userSymbol;
+      updateBoard();
+      if (checkWinner(userSymbol)) {
+        showWinner(userSymbol);
+        return;
+      }
+
+      if (isDraw()) {
+        document.getElementById("statusText").textContent = "It's a Draw!";
+        return;
+      }
+
+      setTimeout(botMove, 500);
+    }
+
+    function botMove() {
+      let emptyCells = board.map((val, i) => val === "" ? i : null).filter(val => val !== null);
+      if (emptyCells.length === 0 || gameOver) return;
+
+      let move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      board[move] = botSymbol;
+      updateBoard();
+
+      if (checkWinner(botSymbol)) {
+        showWinner(botSymbol);
+        return;
+      }
+
+      if (isDraw()) {
+        document.getElementById("statusText").textContent = "It's a Draw!";
+      } else {
+        document.getElementById("statusText").textContent = "Your turn!";
+      }
+    }
+
+    function updateBoard() {
+      const cells = document.querySelectorAll(".cell");
+      board.forEach((val, i) => {
+        cells[i].textContent = val;
+        cells[i].style.pointerEvents = val === "" && !gameOver ? "auto" : "none";
+      });
+    }
+
+    function isDraw() {
+      return board.every(cell => cell !== "");
+    }
+
+    function checkWinner(symbol) {
+      const winPatterns = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      return winPatterns.some(pattern =>
+        pattern.every(index => board[index] === symbol)
+      );
+    }
+
+    function showWinner(symbol) {
+      gameOver = true;
+      document.getElementById("statusText").textContent = (symbol === userSymbol) ? "You Win! 🎉" : "Bot Wins 🤖";
+      highlightWinningPattern(symbol);
+    }
+
+    function highlightWinningPattern(symbol) {
+      const winPatterns = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+
+      const cells = document.querySelectorAll(".cell");
+
+      for (let pattern of winPatterns) {
+        if (pattern.every(index => board[index] === symbol)) {
+          pattern.forEach(i => cells[i].classList.add("winner"));
+          break;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
